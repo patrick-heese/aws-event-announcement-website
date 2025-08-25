@@ -1,0 +1,4 @@
+{
+  "httpMethod": "POST",
+  "body": "{\"title\":\"Tech Meetup\",\"date\":\"2025-12-01\",\"description\":\"A gathering of tech enthusiasts!\"}"
+}
