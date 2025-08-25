@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Event Management Application with CORS-enabled API Gateway and static S3 site
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: python3.12
+
+Resources:
+
+  ##################################################
+  # S3 bucket for static website
+  ##################################################
+  EventWebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  EventWebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref EventWebsiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${EventWebsiteBucket.Arn}/*"
+
+  ##################################################
+  # SNS Topic
+  ##################################################
+  EventAnnouncementsTopic:
+    Type: AWS::SNS::Topic
+
+  ##################################################
+  # IAM Roles
+  ##################################################
+  LambdaSubscriberRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SubscribeToSNSTopic
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: sns:Subscribe
+                Resource: !Ref EventAnnouncementsTopic
+
+  EventCreationLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PublishAndS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref EventAnnouncementsTopic
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub "${EventWebsiteBucket.Arn}/*"
+
+  ##################################################
+  # API Gateway with CORS enabled
+  ##################################################
+  EventManagementAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: EventManagementAPI
+      StageName: dev
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowMethods: "'OPTIONS,POST'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  ##################################################
+  # Lambda functions
+  ##################################################
+  SubscribeToSNSFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SubscribeToSNSFunction
+      Handler: subscribe_lambda.lambda_handler
+      CodeUri: ../src/subscribe_function/
+      Role: !GetAtt LambdaSubscriberRole.Arn
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref EventAnnouncementsTopic
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /subscribe
+            Method: post
+            RestApiId: !Ref EventManagementAPI
+
+  CreateEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CreateEventFunction
+      Handler: announce_lambda.lambda_handler
+      CodeUri: ../src/announce_function/
+      Role: !GetAtt EventCreationLambdaRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref EventWebsiteBucket
+          SNS_TOPIC_ARN: !Ref EventAnnouncementsTopic
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /create-event
+            Method: post
+            RestApiId: !Ref EventManagementAPI
+
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt EventWebsiteBucket.WebsiteURL
+    Description: URL of the static S3 website
+
+  BucketName:
+    Value: !Ref EventWebsiteBucket
+    Description: S3 bucket name for the website
+
+  TopicArn:
+    Value: !Ref EventAnnouncementsTopic
+    Description: SNS Topic ARN
+
+  ApiEndpoint:
+    Value: !Sub "https://${EventManagementAPI}.execute-api.${AWS::Region}.amazonaws.com/dev"
+    Description: API Gateway endpoint URL
+
+  ApiId:
+    Value: !Ref EventManagementAPI
+    Description: API Gateway RestApi ID
