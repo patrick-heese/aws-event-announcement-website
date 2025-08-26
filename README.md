@@ -18,7 +18,7 @@ A serverless application that allows users to register for events and subscribe 
 - Implementing static website hosting with S3 and managing updates programmatically.  
 - Automating subscriber notifications using SNS and Lambda integration.  
 - Developing RESTful APIs with API Gateway and Lambda proxy integration.  
-- Provisioning cloud infrastructure using **AWS SAM** templates.  
+- Provisioning cloud infrastructure using AWS SAM templates.  
 - Applying IAM roles, policies, and least-privilege permissions for secure deployments.  
 
 ## Features
