@@ -52,36 +52,6 @@ To provision the required AWS infrastructure, deploy using the included **SAM** 
 - `..\Python312\`
 - `..\Python312\Scripts`  
 
-## Project Structure
-```plaintext
-aws-event-announcement-website/
-├── assets/                      # Images, diagrams, screenshots
-│   ├── architecture-diagram.png      # Project architecture
-│   └── application-screenshot.png    # Sample application screenshot
-├── cloudformation/              # AWS SAM template
-│   └── template.yaml                 # Main SAM template
-├── src/                         # Lambda source code
-│   └── subscribe_function/           # Subscribe Lambda
-│       └── subscribe_lambda.py
-│   └── announce_function/            # Announcement Lambda
-│       └── announce_lambda.py
-│	└── events/                       # Lambda test events
-│   	├── announce_event.json      
-│   	└── subscribe_event.json       
-├── static/                      # Website resources
-│   ├── events.json      		      # Event list
-│   ├── index.html      			  # Site Homepage
-│   └── styles.css                    # Website styling
-├── LICENSE
-├── README.md
-└── .gitignore
-```
-
-## Screenshot
-![Website](assets/application-screenshot.png)
-
-*Figure 2: Website with buttons "Subscribe to Events" and "Create New Event" that invoke Lambda functions*.
-
 ## How to Use
 1. **Deploy the infrastructure** using SAM.  
 2. **Edit** `index.html` file and add API endpoint URL, replacing `<YOUR_API_ENDPOINT_URL>`.  
@@ -117,6 +87,37 @@ aws-event-announcement-website/
 5. **Access the website** via the S3 static website URL.  
 6. **Register subscribers** using the form, which triggers the Subscription Lambda to add emails to the SNS topic.  
 7. **Add events** using the form, which triggers the Event Registration Lambda to update the `events.json` file in the S3 bucket and send notifications via SNS.  
+
+## Project Structure
+```plaintext
+aws-event-announcement-website/
+├── assets/                      # Images, diagrams, screenshots
+│   ├── architecture-diagram.png      # Project architecture
+│   └── application-screenshot.png    # Sample application screenshot
+├── cloudformation/              # AWS SAM template
+│   └── template.yaml                 # Main SAM template
+├── src/                         # Lambda source code
+│   └── subscribe_function/           # Subscribe Lambda
+│       └── subscribe_lambda.py
+│   └── announce_function/            # Announcement Lambda
+│       └── announce_lambda.py
+│	└── events/                       # Lambda test events
+│   	├── announce_event.json      
+│   	└── subscribe_event.json       
+├── static/                      # Website resources
+│   ├── events.json      		      # Event list
+│   ├── index.html      			  # Site Homepage
+│   └── styles.css                    # Website styling
+├── LICENSE
+├── README.md
+└── .gitignore
+```
+
+## Screenshot
+![Website](assets/application-screenshot.png)
+
+*Figure 2: Website with buttons "Subscribe to Events" and "Create New Event" that invoke Lambda functions*.
+
 ## Future Enhancements 
 - Include **authentication** for event creation.  
 - Extend support for **Terraform** to offer multi-IaC flexibility.  
