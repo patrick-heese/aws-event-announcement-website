@@ -91,12 +91,12 @@ To provision the required AWS infrastructure, deploy using the included **SAM** 
 ## Project Structure
 ```plaintext
 aws-event-announcement-website/
-├── assets/                      # Images, diagrams, screenshots
+├── assets/                      	  # Images, diagrams, screenshots
 │   ├── architecture-diagram.png      # Project architecture
 │   └── application-screenshot.png    # Sample application screenshot
-├── cloudformation/              # AWS SAM template
+├── cloudformation/                   # AWS SAM template
 │   └── template.yaml                 # Main SAM template
-├── src/                         # Lambda source code
+├── src/                              # Lambda source code
 │   └── subscribe_function/           # Subscribe Lambda
 │       └── subscribe_lambda.py
 │   └── announce_function/            # Announcement Lambda
@@ -104,7 +104,7 @@ aws-event-announcement-website/
 │	└── events/                       # Lambda test events
 │   	├── announce_event.json      
 │   	└── subscribe_event.json       
-├── static/                      # Website resources
+├── static/                           # Website resources
 │   ├── events.json      		      # Event list
 │   ├── index.html      			  # Site Homepage
 │   └── styles.css                    # Website styling
