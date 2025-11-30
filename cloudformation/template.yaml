@@ -101,7 +101,8 @@ Resources:
     Properties:
       Name: EventManagementAPI
       StageName: dev
-      EndpointConfiguration: REGIONAL
+      EndpointConfiguration:
+        Type: REGIONAL
       Cors:
         AllowMethods: "'OPTIONS,POST'"
         AllowHeaders: "'Content-Type'"
